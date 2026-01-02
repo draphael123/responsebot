@@ -9,12 +9,15 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "build:shared": "cd packages/shared && npx --yes tsc",
+    "build:shared": "npx tsc -p packages/shared",
     "lint": "turbo run lint",
     "clean": "turbo run clean"
   },
   "devDependencies": {
     "turbo": "^1.10.16",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
     "typescript": "^5.3.3"
   }
 }

@@ -4,7 +4,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "npx tsc || ../../node_modules/.bin/tsc || tsc",
     "dev": "tsc --watch",
     "clean": "rm -rf dist"
   },
