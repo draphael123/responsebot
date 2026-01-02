@@ -16,9 +16,14 @@ for (const possiblePath of possiblePaths) {
     // Check if it's a valid package (has package.json)
     if (fs.existsSync(path.join(possiblePath, "package.json"))) {
       sharedPath = possiblePath;
+      console.log(`Found shared package at: ${sharedPath}`);
       break;
     }
   }
+}
+
+if (!sharedPath) {
+  console.warn("Warning: Could not find @fountain/shared package. Build may fail.");
 }
 
 const nextConfig = {
@@ -26,20 +31,26 @@ const nextConfig = {
   transpilePackages: ["@fountain/shared"],
   // Ensure webpack can resolve the shared package
   webpack: (config, { isServer }) => {
-    if (sharedPath) {
-      // Add alias pointing to the package directory
-      // Webpack will use package.json "main" field to resolve to dist/index.js
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        "@fountain/shared": sharedPath,
-      };
-      
-      // Also add to resolve.modules to help with resolution
-      if (!config.resolve.modules) {
-        config.resolve.modules = [];
-      }
-      config.resolve.modules.push(path.resolve(sharedPath, ".."));
+    // Always add the alias - webpack will resolve it
+    const resolvedPath = sharedPath || path.resolve(__dirname, "../../packages/shared");
+    
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@fountain/shared": resolvedPath,
+    };
+    
+    // Add packages directory to module resolution
+    const packagesDir = path.resolve(resolvedPath, "..");
+    if (!config.resolve.modules) {
+      config.resolve.modules = ["node_modules"];
     }
+    if (!config.resolve.modules.includes(packagesDir)) {
+      config.resolve.modules.push(packagesDir);
+    }
+    
+    // Ensure the dist folder is included in the resolution
+    config.resolve.extensions = [...(config.resolve.extensions || []), ".js", ".ts", ".tsx"];
+    
     return config;
   },
 };
