@@ -31,30 +31,27 @@ const nextConfig = {
   transpilePackages: ["@fountain/shared"],
   // Ensure webpack can resolve the shared package
   webpack: (config, { isServer }) => {
-    // Always add the alias - point directly to the dist folder for resolution
+    // Always add the alias - point to package root, webpack will use package.json main field
     const resolvedPath = sharedPath || path.resolve(__dirname, "../../packages/shared");
-    const distPath = path.join(resolvedPath, "dist");
     
-    // Point alias to dist folder directly, or fallback to package root
-    const aliasPath = fs.existsSync(distPath) ? distPath : resolvedPath;
+    // Verify dist exists (should be built by prebuild script)
+    const distPath = path.join(resolvedPath, "dist", "index.js");
+    if (!fs.existsSync(distPath)) {
+      console.error(`Error: Shared package dist not found at ${distPath}. Make sure prebuild script ran.`);
+    }
     
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@fountain/shared": aliasPath,
+      "@fountain/shared": resolvedPath,
     };
     
-    // Also add the package root to modules for package.json resolution
+    // Add packages directory to module resolution
     if (!config.resolve.modules) {
       config.resolve.modules = ["node_modules"];
     }
     const packagesDir = path.resolve(resolvedPath, "..");
     if (!config.resolve.modules.includes(packagesDir)) {
       config.resolve.modules.push(packagesDir);
-    }
-    
-    // Add the shared package directory itself to modules
-    if (!config.resolve.modules.includes(resolvedPath)) {
-      config.resolve.modules.push(resolvedPath);
     }
     
     return config;
