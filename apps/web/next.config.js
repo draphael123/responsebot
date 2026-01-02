@@ -31,25 +31,31 @@ const nextConfig = {
   transpilePackages: ["@fountain/shared"],
   // Ensure webpack can resolve the shared package
   webpack: (config, { isServer }) => {
-    // Always add the alias - webpack will resolve it
+    // Always add the alias - point directly to the dist folder for resolution
     const resolvedPath = sharedPath || path.resolve(__dirname, "../../packages/shared");
+    const distPath = path.join(resolvedPath, "dist");
+    
+    // Point alias to dist folder directly, or fallback to package root
+    const aliasPath = fs.existsSync(distPath) ? distPath : resolvedPath;
     
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@fountain/shared": resolvedPath,
+      "@fountain/shared": aliasPath,
     };
     
-    // Add packages directory to module resolution
-    const packagesDir = path.resolve(resolvedPath, "..");
+    // Also add the package root to modules for package.json resolution
     if (!config.resolve.modules) {
       config.resolve.modules = ["node_modules"];
     }
+    const packagesDir = path.resolve(resolvedPath, "..");
     if (!config.resolve.modules.includes(packagesDir)) {
       config.resolve.modules.push(packagesDir);
     }
     
-    // Ensure the dist folder is included in the resolution
-    config.resolve.extensions = [...(config.resolve.extensions || []), ".js", ".ts", ".tsx"];
+    // Add the shared package directory itself to modules
+    if (!config.resolve.modules.includes(resolvedPath)) {
+      config.resolve.modules.push(resolvedPath);
+    }
     
     return config;
   },
