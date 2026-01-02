@@ -9,9 +9,16 @@ import {
 } from "@fountain/shared";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization of OpenAI client to avoid build-time errors
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error(
+      "OPENAI_API_KEY environment variable is required. Please set it in your Vercel environment variables."
+    );
+  }
+  return new OpenAI({ apiKey });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -88,6 +95,7 @@ ${context?.currentStatus ? `Current Status: ${context.currentStatus}` : ""}
 
 Generate a response following the style guidelines above.`;
 
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: process.env.OPENAI_MODEL || "gpt-4-turbo-preview",
       messages: [
