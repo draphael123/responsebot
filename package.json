@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "build:shared": "npx tsc -p packages/shared",
+    "build:shared": "cd packages/shared && npx tsc && cd ../..",
     "lint": "turbo run lint",
     "clean": "turbo run clean"
   },
