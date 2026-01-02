@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "cd ../.. && npm run build:shared",
+    "prebuild": "cd ../.. && npm run build:shared || (cd ../../packages/shared && npx tsc)",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
