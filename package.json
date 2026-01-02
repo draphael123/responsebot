@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "build:shared": "cd packages/shared && npm run build",
     "lint": "turbo run lint",
     "clean": "turbo run clean"
   },
